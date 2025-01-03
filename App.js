@@ -1,14 +1,15 @@
 import React from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Map from './components/Map';
+import {SafeAreaView, SafeAreaProvider} from "react-native-safe-area-context";
 
 export default function App() {
   return (
-      <View style={styles.container}>
+      <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
         <Map />
-        <StatusBar style="auto" />
-      </View>
+      </SafeAreaView>
+      </SafeAreaProvider>
   );
 }
 

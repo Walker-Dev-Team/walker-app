@@ -4493,6 +4493,11 @@ react-native-maps@^1.20.1:
   dependencies:
     "@types/geojson" "^7946.0.13"
 
+react-native-safe-area-context@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-safe-area-context/-/react-native-safe-area-context-5.0.0.tgz#0f28f3b406d4466c6afdaaa615198d12741e88b5"
+  integrity sha512-4K4TvEbRsTDYuSSJZfMNKuJNn1+qgrSkOBwRoreiHcuqy1egrHpkhPhoN1Zg1+b3BxcVXlKXtMIf4eVaG/DPJw==
+
 react-native@0.76.5:
   version "0.76.5"
   resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.76.5.tgz#3ce43d3c31f46cfd98e56ef2dfc70866c04ad185"
