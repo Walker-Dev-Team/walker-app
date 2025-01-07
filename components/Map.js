@@ -5,8 +5,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StyleSheet, View, Dimensions, Text, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { AnimatePresence, MotiView } from 'moti'; // Animation library
+import { useNavigation } from '@react-navigation/native';
 
 export default function Map() {
+    const navigation = useNavigation();
+
     const [location, setLocation] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
     const [isRecording, setIsRecording] = useState(false);
@@ -143,6 +146,13 @@ export default function Map() {
             <TouchableOpacity style={styles.recenterButton} onPress={recenterMap}>
                 <MaterialIcons name="my-location" size={24} color="white" />
             </TouchableOpacity>
+
+            <TouchableOpacity
+                style={[styles.startButton, { bottom: 80 }]}
+                onPress={() => navigation.navigate('WalkHistory')}
+            >
+                <Text style={styles.buttonText}>View Walk History</Text>
+            </TouchableOpacity>;
 
             {/* Animated Walk Controls */}
             <AnimatePresence>
