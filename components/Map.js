@@ -152,7 +152,7 @@ export default function Map() {
                 onPress={() => navigation.navigate('WalkHistory')}
             >
                 <Text style={styles.buttonText}>View Walk History</Text>
-            </TouchableOpacity>;
+            </TouchableOpacity>
 
             {/* Animated Walk Controls */}
             <AnimatePresence>
