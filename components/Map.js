@@ -33,7 +33,6 @@ export default function Map() {
             setLocation(currentLocation.coords);
         })();
 
-        // Update timer when app goes to background or foreground
         const handleAppStateChange = async (nextAppState) => {
             if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
                 const elapsed = await getElapsedTime();
@@ -42,12 +41,11 @@ export default function Map() {
             appState.current = nextAppState;
         };
 
-        AppState.addEventListener('change', handleAppStateChange);
+        const subscription = AppState.addEventListener('change', handleAppStateChange);
 
         return () => {
             // Cleanup event listener using the remove method
-            AppState.removeEventListener('change', handleAppStateChange);
-
+            subscription.remove();
         };
     }, []);
 
@@ -61,7 +59,6 @@ export default function Map() {
             console.error(err);
         }
     };
-
     const recordStartTime = async () => {
         try {
             const now = new Date();
@@ -70,7 +67,6 @@ export default function Map() {
             console.warn(err);
         }
     };
-
     const startRecording = async () => {
         setIsRecording(true);
         setRoute([]);
