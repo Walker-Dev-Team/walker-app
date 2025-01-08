@@ -4,22 +4,23 @@ import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StyleSheet, View, Dimensions, Text, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { AnimatePresence, MotiView } from 'moti'; // Animation library
+import { AnimatePresence, MotiView } from 'moti';
 import { useNavigation } from '@react-navigation/native';
+import { AppState } from 'react-native';
+import { differenceInSeconds } from 'date-fns';
 
 export default function Map() {
     const navigation = useNavigation();
-
     const [location, setLocation] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
     const [isRecording, setIsRecording] = useState(false);
-    const [isPaused, setIsPaused] = useState(false); // Track if recording is paused
     const [route, setRoute] = useState([]);
     const [timer, setTimer] = useState(0);
     const [walks, setWalks] = useState([]);
     const mapRef = useRef(null);
     const timerRef = useRef(null);
-    const locationSubscription = useRef(null); // UseRef for location subscription
+    const locationSubscription = useRef(null);
+    const appState = useRef(AppState.currentState);
 
     useEffect(() => {
         (async () => {
@@ -31,13 +32,50 @@ export default function Map() {
             let currentLocation = await Location.getCurrentPositionAsync({});
             setLocation(currentLocation.coords);
         })();
+
+        // Update timer when app goes to background or foreground
+        const handleAppStateChange = async (nextAppState) => {
+            if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+                const elapsed = await getElapsedTime();
+                setTimer(elapsed);
+            }
+            appState.current = nextAppState;
+        };
+
+        AppState.addEventListener('change', handleAppStateChange);
+
+        return () => {
+            // Cleanup event listener using the remove method
+            AppState.removeEventListener('change', handleAppStateChange);
+
+        };
     }, []);
+
+
+    const getElapsedTime = async () => {
+        try {
+            const startTime = await AsyncStorage.getItem('@start_time');
+            const now = new Date();
+            return startTime ? differenceInSeconds(now, new Date(startTime)) : 0;
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const recordStartTime = async () => {
+        try {
+            const now = new Date();
+            await AsyncStorage.setItem('@start_time', now.toISOString());
+        } catch (err) {
+            console.warn(err);
+        }
+    };
 
     const startRecording = async () => {
         setIsRecording(true);
-        setIsPaused(false);
         setRoute([]);
         setTimer(0);
+        recordStartTime(); // Store the start time in AsyncStorage
         timerRef.current = setInterval(() => setTimer((prev) => prev + 1), 1000);
 
         locationSubscription.current = await Location.watchPositionAsync(
@@ -71,31 +109,6 @@ export default function Map() {
         }
     };
 
-    const togglePause = async () => {
-        if (isPaused) {
-            // Unpause logic
-            timerRef.current = setInterval(() => setTimer((prev) => prev + 1), 1000);
-            locationSubscription.current = await Location.watchPositionAsync(
-                {
-                    accuracy: Location.Accuracy.High,
-                    distanceInterval: 5,
-                },
-                (newLocation) => {
-                    const { latitude, longitude } = newLocation.coords;
-                    setRoute((prev) => [...prev, { latitude, longitude }]);
-                }
-            );
-        } else {
-            // Pause logic
-            clearInterval(timerRef.current);
-            if (locationSubscription.current) {
-                locationSubscription.current.remove();
-                locationSubscription.current = null;
-            }
-        }
-        setIsPaused(!isPaused);
-    };
-
     const recenterMap = async () => {
         if (location && mapRef.current) {
             let currentLocation = await Location.getCurrentPositionAsync({});
@@ -103,8 +116,8 @@ export default function Map() {
             mapRef.current.animateToRegion({
                 latitude: currentLocation.coords.latitude,
                 longitude: currentLocation.coords.longitude,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
             });
         }
     };
@@ -125,8 +138,8 @@ export default function Map() {
                 initialRegion={{
                     latitude: location.latitude,
                     longitude: location.longitude,
-                    latitudeDelta: 0.0922,
-                    longitudeDelta: 0.0421,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
                 }}
             >
                 <Marker
@@ -138,7 +151,7 @@ export default function Map() {
                     description="You are here"
                 />
                 {route.length > 1 && (
-                    <Polyline coordinates={route} strokeColor="#007bff" strokeWidth={4} />
+                    <Polyline coordinates={route} strokeColor="#007bff" strokeWidth={6} />
                 )}
             </MapView>
 
@@ -167,14 +180,6 @@ export default function Map() {
                         <Text style={styles.timer}>{`Time: ${Math.floor(timer / 60)}:${String(
                             timer % 60
                         ).padStart(2, '0')}`}</Text>
-                        <TouchableOpacity
-                            style={styles.pauseButton}
-                            onPress={togglePause}
-                        >
-                            <Text style={styles.buttonText}>
-                                {isPaused ? 'Unpause' : 'Pause'}
-                            </Text>
-                        </TouchableOpacity>
                         <TouchableOpacity style={styles.stopButton} onPress={stopRecording}>
                             <Text style={styles.buttonText}>Stop</Text>
                         </TouchableOpacity>
@@ -242,14 +247,6 @@ const styles = StyleSheet.create({
         color: 'black',
         fontSize: 18,
         marginBottom: 10,
-    },
-    pauseButton: {
-        backgroundColor: '#ffc107',
-        padding: 10,
-        borderRadius: 5,
-        marginBottom: 10,
-        width: '80%',
-        alignItems: 'center',
     },
     stopButton: {
         backgroundColor: '#dc3545',

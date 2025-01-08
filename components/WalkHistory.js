@@ -40,8 +40,8 @@ export default function WalkHistory() {
                     initialRegion={{
                         latitude: walks[0]?.path[0]?.latitude || 37.78825,
                         longitude: walks[0]?.path[0]?.longitude || -122.4324,
-                        latitudeDelta: 0.1,
-                        longitudeDelta: 0.1,
+                        latitudeDelta: 0.01,
+                        longitudeDelta: 0.01,
                     }}
                 >
                     {walks.map((walk, index) => (
@@ -49,7 +49,7 @@ export default function WalkHistory() {
                             key={index}
                             coordinates={walk.path}
                             strokeColor="#007bff"
-                            strokeWidth={4}
+                            strokeWidth={6}
                         />
                     ))}
                 </MapView>
