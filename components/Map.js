@@ -94,16 +94,18 @@ export default function Map() {
             locationSubscription.current = null;
         }
         if (route.length > 0) {
+            const startTime = await AsyncStorage.getItem('@start_time');
             const walk = {
                 path: route,
                 time: timer,
-                date: new Date().toISOString(),
+                startTime: startTime || new Date().toISOString(),
             };
             const updatedWalks = [...walks, walk];
             setWalks(updatedWalks);
             await AsyncStorage.setItem('walks', JSON.stringify(updatedWalks));
         }
     };
+
 
     const recenterMap = async () => {
         if (location && mapRef.current) {
@@ -158,7 +160,7 @@ export default function Map() {
 
             <TouchableOpacity
                 style={[styles.startButton, { bottom: 80 }]}
-                onPress={() => navigation.navigate('WalkHistory')}
+                onPress={() => navigation.navigate('WalkList')}
             >
                 <Text style={styles.buttonText}>View Walk History</Text>
             </TouchableOpacity>

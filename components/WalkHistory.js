@@ -1,61 +1,42 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import MapView, { Polyline } from 'react-native-maps';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function WalkHistory() {
-    const [walks, setWalks] = useState([]);
+export default function WalkDetails({ route }) {
     const mapRef = useRef(null);
+    const { walk } = route.params;
 
     useEffect(() => {
-        const loadWalks = async () => {
-            const storedWalks = await AsyncStorage.getItem('walks');
-            if (storedWalks) {
-                setWalks(JSON.parse(storedWalks));
-            }
-        };
-        loadWalks();
-    }, []);
-
-    const fitToMarkers = () => {
-        if (mapRef.current && walks.length > 0) {
-            const allCoords = walks.flatMap((walk) => walk.path);
-            mapRef.current.fitToCoordinates(allCoords, {
+        if (mapRef.current && walk?.path?.length > 0) {
+            mapRef.current.fitToCoordinates(walk.path, {
                 edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
                 animated: true,
             });
         }
-    };
-
-    useEffect(() => {
-        fitToMarkers();
-    }, [walks]);
+    }, [walk]);
 
     return (
         <View style={styles.container}>
-            {walks.length > 0 ? (
+            {walk?.path?.length > 0 ? (
                 <MapView
                     ref={mapRef}
                     style={styles.map}
                     initialRegion={{
-                        latitude: walks[0]?.path[0]?.latitude || 37.78825,
-                        longitude: walks[0]?.path[0]?.longitude || -122.4324,
+                        latitude: walk.path[0]?.latitude || 37.78825,
+                        longitude: walk.path[0]?.longitude || -122.4324,
                         latitudeDelta: 0.01,
                         longitudeDelta: 0.01,
                     }}
                 >
-                    {walks.map((walk, index) => (
-                        <Polyline
-                            key={index}
-                            coordinates={walk.path}
-                            strokeColor="#007bff"
-                            strokeWidth={6}
-                        />
-                    ))}
+                    <Polyline
+                        coordinates={walk.path}
+                        strokeColor="#007bff"
+                        strokeWidth={6}
+                    />
                 </MapView>
             ) : (
                 <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyText}>No walks recorded yet.</Text>
+                    <Text style={styles.emptyText}>No path data available for this walk.</Text>
                 </View>
             )}
         </View>
