@@ -3101,7 +3101,7 @@ expo-background-fetch@^13.0.3:
   dependencies:
     expo-task-manager "~12.0.0"
 
-expo-constants@~17.0.0, expo-constants@~17.0.3:
+expo-constants@^17.0.3, expo-constants@~17.0.0, expo-constants@~17.0.3:
   version "17.0.3"
   resolved "https://registry.npmjs.org/expo-constants/-/expo-constants-17.0.3.tgz"
   integrity sha512-lnbcX2sAu8SucHXEXxSkhiEpqH+jGrf+TF+MO6sHWIESjwOUVVYlT8qYdjR9xbxWmqFtrI4KV44FkeJf2DaFjQ==
