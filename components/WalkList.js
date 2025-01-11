@@ -75,7 +75,7 @@ export default function WalkList() {
                         )}
                     </TouchableOpacity>
                 )}
-                ListEmptyComponent={<Text style={styles.empty}>No walks recorded yet.</Text>}
+                ListEmptyComponent={<Text style={styles.empty}>No walks recorded yet</Text>}
             />
         </View>
     );
@@ -83,12 +83,12 @@ export default function WalkList() {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         padding: 24,
     },
     list: {
         backgroundColor: 'white',
         borderRadius: 16,
+        paddingVertical: 16
     },
     item: {
         padding: 16,
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     empty: {
         textAlign: 'center',
         fontSize: 16,
-        marginTop: 20,
+        color: 'rgba(97, 97, 97, 0.7)',
     },
     imageWrapper: {
         backgroundColor: '#639616',

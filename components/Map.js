@@ -169,7 +169,7 @@ export default function Map() {
                     description="You are here"
                 />
                 {route.length > 1 && (
-                    <Polyline coordinates={route} strokeColor="#007bff" strokeWidth={6} />
+                    <Polyline coordinates={route} strokeColor="#639616" strokeWidth={6} />
                 )}
             </MapView>
 
