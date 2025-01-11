@@ -1,11 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
 export default function WalkList() {
     const [walks, setWalks] = useState([]);
     const navigation = useNavigation();
+
+    useEffect(() => {
+        // Setting custom header options
+        navigation.setOptions({
+            headerStyle: {
+                backgroundColor: '#639616',
+                borderBottomLeftRadius: 16,
+                borderBottomRightRadius: 16,
+            },
+            headerTitleStyle: {
+                fontSize: 28,
+                fontWeight: 500,
+                color: 'white',
+            },
+            headerTitle: 'Walk history',
+            headerTintColor: 'white',
+            headerShown: true,
+            headerTitleAlign: 'center',
+        });
+    }, [navigation]);
 
     useEffect(() => {
         const loadWalks = async () => {
@@ -19,21 +39,40 @@ export default function WalkList() {
 
     const formatDateTime = (dateTime) => {
         const date = new Date(dateTime);
-        return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+        const options = { month: 'long', day: 'numeric' };
+        return date.toLocaleDateString('en-US', options); // Format as "January 10"
+    };
+
+
+
+    const formatDuration = (seconds) => {
+        const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+        const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+        const secs = String(seconds % 60).padStart(2, '0');
+        return `${hrs}:${mins}:${secs}`;
     };
 
     return (
         <View style={styles.container}>
             <FlatList
+                style={styles.list}
                 data={walks}
                 keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => (
+                renderItem={({ item, index }) => (
                     <TouchableOpacity
                         style={styles.item}
                         onPress={() => navigation.navigate('WalkHistory', { walk: item })}
                     >
-                        <Text style={styles.date}>{formatDateTime(item.startTime)}</Text>
-                        <Text style={styles.time}>{`Duration: ${Math.floor(item.time / 60)}m ${item.time % 60}s`}</Text>
+                        <View style={styles.itemInfo}>
+                            <Text style={styles.date}>{formatDateTime(item.startTime)}</Text>
+                            <Text style={styles.time}>{`Time: ${formatDuration(item.time)}`}</Text>
+                        </View>
+                        <View style={styles.imageWrapper}>
+                            <Image source={require('../assets/icons/arrowIcon.png')} />
+                        </View>
+                        {index !== walks.length - 1 && (
+                            <View style={styles.borderBottom} />
+                        )}
                     </TouchableOpacity>
                 )}
                 ListEmptyComponent={<Text style={styles.empty}>No walks recorded yet.</Text>}
@@ -45,30 +84,48 @@ export default function WalkList() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
+        padding: 24,
+    },
+    list: {
+        backgroundColor: 'white',
+        borderRadius: 16,
     },
     item: {
-        padding: 15,
-        marginVertical: 8,
-        backgroundColor: '#f9f9f9',
-        borderRadius: 8,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
+        padding: 16,
+        position: 'relative',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
-    date: {
-        fontSize: 16,
-        fontWeight: 'bold',
+    borderBottom: {
+        position: 'absolute',
+        bottom: 0,
+        left: '15%', // Center the border
+        width: '80%', // Set width to 60%
+        height: 1, // Border height
+        backgroundColor: 'rgba(51, 51, 51, 0.1)', // Border color with opacity
     },
     time: {
         fontSize: 14,
-        color: '#555',
+        color: 'rgba(97, 97, 97, 0.7)',
     },
     empty: {
         textAlign: 'center',
         fontSize: 16,
-        color: 'gray',
         marginTop: 20,
+    },
+    imageWrapper: {
+        backgroundColor: '#639616',
+        padding: 6,
+        alignSelf: 'center',
+        borderRadius: 12,
+    },
+    itemInfo: {
+        position: 'relative',
+    },
+    date: {
+        color: '#639616',
+        fontSize: 20,
+        fontWeight: 'bold',
     },
 });
