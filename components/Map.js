@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StyleSheet, View, Dimensions, Text, TouchableOpacity } from 'react-native';
+import {StyleSheet, View, Dimensions, Text, TouchableOpacity, Image} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { AnimatePresence, MotiView } from 'moti';
 import { useNavigation } from '@react-navigation/native';
@@ -21,6 +21,26 @@ export default function Map() {
     const timerRef = useRef(null);
     const locationSubscription = useRef(null);
     const appState = useRef(AppState.currentState);
+
+    useEffect(() => {
+        // Setting custom header options
+        navigation.setOptions({
+            headerStyle: {
+                backgroundColor: '#639616',
+                borderBottomLeftRadius: 16,
+                borderBottomRightRadius: 16,
+            },
+            headerTitleStyle: {
+                fontSize: 28,
+                fontWeight: 500,
+                color: 'white',
+            },
+            headerTitle: 'Map',
+            headerTintColor: 'white',
+            headerShown: true,
+            headerTitleAlign: 'center',
+        });
+    }, [navigation]);
 
     useEffect(() => {
         (async () => {
@@ -107,18 +127,18 @@ export default function Map() {
     };
 
 
-    const recenterMap = async () => {
-        if (location && mapRef.current) {
-            let currentLocation = await Location.getCurrentPositionAsync({});
-            setLocation(currentLocation.coords);
-            mapRef.current.animateToRegion({
-                latitude: currentLocation.coords.latitude,
-                longitude: currentLocation.coords.longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-            });
-        }
-    };
+    // const recenterMap = async () => {
+    //     if (location && mapRef.current) {
+    //         let currentLocation = await Location.getCurrentPositionAsync({});
+    //         setLocation(currentLocation.coords);
+    //         mapRef.current.animateToRegion({
+    //             latitude: currentLocation.coords.latitude,
+    //             longitude: currentLocation.coords.longitude,
+    //             latitudeDelta: 0.01,
+    //             longitudeDelta: 0.01,
+    //         });
+    //     }
+    // };
 
     if (!location) {
         return (
@@ -153,18 +173,6 @@ export default function Map() {
                 )}
             </MapView>
 
-            {/* Recenter Button */}
-            <TouchableOpacity style={styles.recenterButton} onPress={recenterMap}>
-                <MaterialIcons name="my-location" size={24} color="white" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={[styles.startButton, { bottom: 80 }]}
-                onPress={() => navigation.navigate('WalkList')}
-            >
-                <Text style={styles.buttonText}>View Walk History</Text>
-            </TouchableOpacity>
-
             {/* Animated Walk Controls */}
             <AnimatePresence>
                 {isRecording ? (
@@ -175,19 +183,42 @@ export default function Map() {
                         exit={{ translateY: 200 }}
                         transition={{ type: 'timing', duration: 300 }}
                     >
-                        <Text style={styles.timer}>{`Time: ${Math.floor(timer / 60)}:${String(
-                            timer % 60
-                        ).padStart(2, '0')}`}</Text>
+                        <View>
+                        <Text style={[styles.buttonText, {fontSize: 14}]}>Walking time</Text>
+                            <Text style={styles.timer}>
+                                {`${String(Math.floor(timer / 3600)).padStart(2, '0')}:${String(
+                                    Math.floor((timer % 3600) / 60)
+                                ).padStart(2, '0')}:${String(timer % 60).padStart(2, '0')}`}
+                            </Text>
+                        </View>
                         <TouchableOpacity style={styles.stopButton} onPress={stopRecording}>
-                            <Text style={styles.buttonText}>Stop</Text>
+                            <Image source={require('../assets/icons/stopIcon.png')} />
                         </TouchableOpacity>
                     </MotiView>
                 ) : (
+                    <View style={styles.startRecordingBtnWrapper}>
                     <TouchableOpacity style={styles.startButton} onPress={startRecording}>
-                        <Text style={styles.buttonText}>Start Walk</Text>
+                        <View style={styles.imageWrapper}>
+                            <Image source={require('../assets/icons/playIcon.png')} />
+                        </View>
+                        <Text style={styles.buttonText}>Start walk</Text>
                     </TouchableOpacity>
+                    </View>
                 )}
             </AnimatePresence>
+            {!isRecording ? (
+            <View style={styles.walkBtnWrapper}>
+            <TouchableOpacity
+                style={[styles.startButton]}
+                onPress={() => navigation.navigate('WalkList')}
+            >
+                <View style={styles.imageWrapper}>
+                    <Image source={require('../assets/icons/walkHistoryIcon.png')} />
+                </View>
+                <Text style={styles.buttonText}>View walk history</Text>
+            </TouchableOpacity>
+            </View>
+            ) : null}
         </View>
     );
 }
@@ -202,59 +233,85 @@ const styles = StyleSheet.create({
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').height,
     },
-    recenterButton: {
-        position: 'absolute',
-        bottom: 20,
-        right: 20,
-        backgroundColor: '#007bff',
-        borderRadius: 25,
-        width: 50,
-        height: 50,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOpacity: 0.3,
-        shadowRadius: 3,
-        shadowOffset: { width: 0, height: 2 },
-        elevation: 5,
-    },
+    // recenterButton: {
+    //     position: 'absolute',
+    //     bottom: 20,
+    //     right: 20,
+    //     backgroundColor: '#007bff',
+    //     borderRadius: 25,
+    //     width: 50,
+    //     height: 50,
+    //     justifyContent: 'center',
+    //     alignItems: 'center',
+    //     shadowColor: '#000',
+    //     shadowOpacity: 0.3,
+    //     shadowRadius: 3,
+    //     shadowOffset: { width: 0, height: 2 },
+    //     elevation: 5,
+    // },
     startButton: {
-        position: 'absolute',
-        bottom: 20,
-        left: 20,
-        backgroundColor: '#28a745',
+        left: 0,
+        backgroundColor: 'white',
         padding: 10,
-        borderRadius: 5,
+        borderRadius: 16,
+        width: '100%',
+        height: 68,
+        elevation: 1,
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 16
     },
     recordingContainer: {
         position: 'absolute',
-        bottom: 0,
+        bottom: 24,
         left: 0,
         right: 0,
+        marginRight: 24,
+        marginLeft: 24,
         backgroundColor: 'white',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        padding: 20,
+        borderRadius: 16,
+        padding: 16,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOpacity: 0.2,
-        shadowRadius: 5,
-        shadowOffset: { width: 0, height: -2 },
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+elevation: 2
     },
     timer: {
-        color: 'black',
-        fontSize: 18,
-        marginBottom: 10,
+        color: '#639616',
+        fontSize: 24,
+        fontWeight: 600
     },
     stopButton: {
-        backgroundColor: '#dc3545',
-        padding: 10,
-        borderRadius: 5,
-        width: '80%',
+        backgroundColor: '#639616',
+        padding: 6,
+        borderRadius: 12,
         alignItems: 'center',
     },
     buttonText: {
-        color: 'white',
-        fontWeight: 'bold',
+        color: '#333',
+        fontWeight: 400,
+        opacity: 0.7,
+        fontSize: 18
     },
+    walkBtnWrapper: {
+        position: 'absolute',
+        bottom: 24,
+        width: '100%',
+        paddingRight: 24,
+       paddingLeft: 24,
+    },
+    imageWrapper: {
+        backgroundColor: '#639616',
+        padding: 6,
+        alignSelf: 'center',
+        borderRadius: 12
+    },
+    startRecordingBtnWrapper: {
+        position: 'absolute',
+        bottom: 104,
+        width: '100%',
+        paddingRight: 24,
+        paddingLeft: 24,
+    }
 });
